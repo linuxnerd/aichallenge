@@ -12,10 +12,7 @@ class NerdBotAi
 
   def setup(ai)
     @ai = ai
-
-    # 未探索区域
     @unseen = @ai.map.flatten
-    # 已知的敌方洞穴
     @enemy_hills = [] 
   end
 
@@ -34,19 +31,19 @@ class NerdBotAi
     def next_directions
       # orders is hash like {:ant => :W}
       {}.tap do |orders|
-        # 收集food
+        # gathering food
         t_food = FarmerTactics.new(@ai)
         t_food.update_orders(orders)
         
-        # 不堵住hill
+        # not blocking hill
         aimed_foods = t_food.aimed_foods
         s_blocking = NotBlockingHillTactics.new(@ai, '', aimed_foods)
         s_blocking.update_orders(orders)
 
-        # 更新未知区域
+        # update unseen map
         update_unseen
 
-        # 探索未知区域
+        # explorer unseen
         s_explorer = ExplorerTactics.new(@ai, @unseen)
         s_explorer.update_orders(orders)
 
@@ -106,7 +103,7 @@ class TacticsBase
       target = move[:target]
       if !aimed_targets.keys.include?(target) && !aimed_targets.values.include?(ant)
 
-        # 打乱数组，随机方向
+        # random direction
         directions_for(ant, target).shuffle.each do |dir|
           if try_to_occupied(ant, dir, orders)
             aimed_targets[target] = ant
