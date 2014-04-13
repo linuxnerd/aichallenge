@@ -32,20 +32,20 @@ class NerdBotAi
       # orders is hash like {:ant => :W}
       {}.tap do |orders|
         # gathering food
-        t_food = FarmerTactics.new(@ai)
-        t_food.update_orders(orders)
+        farmer = FarmerStrategy.new(@ai)
+        farmer.update_orders(orders)
         
         # not blocking hill
         aimed_foods = t_food.aimed_foods
-        s_blocking = NotBlockingHillTactics.new(@ai, '', aimed_foods)
-        s_blocking.update_orders(orders)
+        not_blocking = NotBlockingHillStrategy.new(@ai, '', aimed_foods)
+        not_blocking.update_orders(orders)
 
         # update unseen map
         update_unseen
 
         # explorer unseen
-        s_explorer = ExplorerTactics.new(@ai, @unseen)
-        s_explorer.update_orders(orders)
+        explorer = ExplorerStrategy.new(@ai, @unseen)
+        explorer.update_orders(orders)
 
       end
     end
@@ -62,7 +62,7 @@ end
 
 
 ####################################
-class TacticsBase
+class StrategyBase
   include Utils
 
   attr_reader :stop_times
@@ -93,7 +93,7 @@ class TacticsBase
     end
   end
 
-  # Return { :food => ant }, only NotBlockingHillTactics needs
+  # Return { :food => ant }, only NotBlockingHillStrategy needs
   def do_locate(distances, orders)
     aimed_targets = {}
     sorted_distances = distances.sort_by { |hash| hash[:distance] }
@@ -132,7 +132,7 @@ class TacticsBase
 end
 
 ####################################
-class FarmerTactics < TacticsBase
+class FarmerStrategy < StrategyBase
   attr_reader :aimed_foods
 
   def update_orders(orders)
@@ -143,11 +143,11 @@ end
 
 
 ####################################
-class HillsAttackerTactics < TacticsBase
+class HillsAttackerStrategy < StrategyBase
 end
 
 ####################################
-class ExplorerTactics < TacticsBase
+class ExplorerStrategy < StrategyBase
   def update_orders(orders)
     free_ants = @ai.my_ants - orders.keys
     unseen_distances = distances_for(free_ants, @unseen)
@@ -157,7 +157,7 @@ class ExplorerTactics < TacticsBase
 end
 
 ####################################
-class NotBlockingHillTactics < TacticsBase
+class NotBlockingHillStrategy < StrategyBase
   def update_orders(orders)
     @ai.my_ants_in_hill.each do |ant|
       unless @aimed_foods.values.include?(ant)
