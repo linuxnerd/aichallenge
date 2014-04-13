@@ -65,8 +65,6 @@ end
 class TacticsBase
   include Utils
 
-  attr_reader :stop_times
-
   def initialize(ai, unseen='', aimed_foods='')
     @ai = ai
     @unseen = unseen
