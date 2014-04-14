@@ -38,7 +38,7 @@ class Ant
   end
 
   def see?(loc)
-    distance(@square, loc) <= @ai.viewradius
+    straight_distance(@square, loc) <= @ai.viewradius
   end
 
   def towards(dir)
