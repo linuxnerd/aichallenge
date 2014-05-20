@@ -33,26 +33,26 @@ class NerdBotAi
       # orders is hash like {:ant => :W}
       {}.tap do |orders|
         # gathering food
-        farmer = FarmerStrategy.new(@ai)
+        farmer = FarmerStrategy.new(ai: @ai)
         farmer.update_orders(orders)
         
         # enemy hills
         update_enemy_hills
 
         # occupied enemy's hills
-        attacker = HillsAttackerStrategy.new(@ai, '', '', @enemy_hills)
+        attacker = HillsAttackerStrategy.new(ai: @ai, enemy_hills: @enemy_hills)
         attacker.update_orders(orders)
 
         # not blocking hill
         aimed_foods = farmer.aimed_foods
-        not_blocking = NotBlockingHillStrategy.new(@ai, '', aimed_foods)
+        not_blocking = NotBlockingHillStrategy.new(ai: @ai, aimed_foods: aimed_foods)
         not_blocking.update_orders(orders)
 
         # update unseen map
         update_unseen
 
         # explorer unseen
-        explorer = ExplorerStrategy.new(@ai, @unseen)
+        explorer = ExplorerStrategy.new(ai: @ai, unseen: @unseen)
         explorer.update_orders(orders)
       end
     end
@@ -73,13 +73,13 @@ end
 class StrategyBase
   include Utils
 
-  def initialize(ai, unseen='', aimed_foods='', enemy_hills='')
-    @ai = ai
+  def initialize(args)
+    @ai = args[:ai]
     @row_max = @ai.settings[:rows]
     @col_max = @ai.settings[:cols]
-    @unseen = unseen
-    @aimed_foods = aimed_foods
-    @enemy_hills = enemy_hills
+    @unseen = args[:unseen]
+    @aimed_foods = args[:aimed_foods]
+    @enemy_hills = args[:enemy_hills]
 
     @logger = Logger.new(LOG_FILE)
 
@@ -115,7 +115,14 @@ class StrategyBase
            end
     [].tap do |distances|
       ants.each do |ant|
-        distances.concat targets.map { |target| {:distance=>spherical_distance(ant, target, @row_max, @col_max), :ant=>ant, :target=>target, :type => type} }
+        distances.concat targets.map { |target| 
+          {
+            :distance=>spherical_distance(ant, target, @row_max, @col_max),
+            :ant=>ant,
+            :target=>target,
+            :type => type
+          }
+        }
       end
     end
   end
